@@ -100,21 +100,44 @@ const Quiz = () => {
 
   console.log(model);
 
+  const fetchPrediction = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/predict', {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonData,
+      });
+
+      return response;
+    } catch (error) {
+      console.log(`Can't fetch prediction: ${error}`);
+    }
+  };
+
   const handleForm = (e) => {
     e.preventDefault();
     if (allValuesZero) {
       alert('Cannot submit. Please enter values > 0.');
+      return;
     }
 
     if (allValuesHundred) {
       alert(
         'According to input given you are eligible for every field but as per our suggestion you should pursue arts,design,entertainment,sports and media occupation or go to mars.'
       );
+      return;
     }
-    console.log(answers);
     setSuccess(true);
     console.log(JSON.stringify(answers));
     setJsonData(JSON.stringify(answers));
+
+    fetchPrediction()
+      .then((res) => res.text())
+      .then((data) => console.log(data))
+      .catch((error) => console.log(error));
 
     setAnswers(initialState);
   };
