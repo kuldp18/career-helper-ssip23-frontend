@@ -1,23 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import Footer from '../components/Footer';
+import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
-import {
-  FormControl,
-  FormLabel,
-  Slider,
-  TextField,
-  Typography,
-} from '@mui/material';
 import Question from '../components/Question';
-// import csvwriter
-import { createObjectCsvWriter } from 'csv-writer';
-import { CSVLink } from 'react-csv';
-
-import axios from 'axios';
-import * as tf from '@tensorflow/tfjs';
 
 const Quiz = () => {
-  const [age, setAge] = useState(15);
   const initialState = {
     activeLearning: 0,
     activeListening: 0,
@@ -56,11 +41,14 @@ const Quiz = () => {
     writing: 0,
   };
 
-  const [model, setModel] = useState(null);
-
   const [success, setSuccess] = useState(false);
 
+  const [result, setResult] = useState('');
+
   const [answers, setAnswers] = useState(initialState);
+
+  // const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const allValuesZero = Object.values(answers).every((value) => value === 0);
 
@@ -70,37 +58,7 @@ const Quiz = () => {
   );
   const [jsonData, setJsonData] = useState('');
 
-  // get model from drive
-  const getModel = async () => {
-    const response = await axios.get('../ml/model.joblib', {
-      responseType: 'arraybuffer',
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
-    return response;
-  };
-
-  useEffect(() => {
-    // axios
-    //   .get('https://drive.google.com/uc?id=1pBD8ZXKbuenQSwUBnA43-bzqBwBHCdrM', {
-    //     responseType: 'arraybuffer',
-    //     headers: {
-    //       'Access-Control-Allow-Origin': '*',
-    //     },
-    //   })
-    //   .then((response) => {
-    //     setModel(tf.loadLayersModel(new Uint8Array(response.data)));
-    //   })
-    //   .catch((error) => {
-    //     console.error(error);
-    //   });
-    getModel();
-  }, []);
-
-  console.log(model);
-
-  const fetchPrediction = async () => {
+  const fetchPrediction = async (json) => {
     try {
       const response = await fetch('http://localhost:5000/predict', {
         method: 'POST',
@@ -108,7 +66,7 @@ const Quiz = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: jsonData,
+        body: json,
       });
 
       return response;
@@ -130,16 +88,50 @@ const Quiz = () => {
       );
       return;
     }
-    setSuccess(true);
-    console.log(JSON.stringify(answers));
     setJsonData(JSON.stringify(answers));
 
-    fetchPrediction()
+    fetchPrediction(JSON.stringify(answers))
       .then((res) => res.text())
-      .then((data) => console.log(data))
-      .catch((error) => console.log(error));
+      .then((data) => {
+        setSuccess(true);
+        setResult(data);
+      })
+      .catch((error) => {
+        setSuccess(false);
+        console.log(error);
+      });
 
     setAnswers(initialState);
+
+    if (success && result) {
+      // redirect to /result
+      // setShouldRedirect(true);
+      setShowModal(true);
+    }
+  };
+
+  // const performRedirect = () => {
+  //   if (shouldRedirect) {
+  //     // redirect to /result with Result component and pass result as props
+  //     return <Redirect to={{ pathname: '/result', state: { result } }} />;
+  //   }
+  // };
+
+  const modal = () => {
+    window.scrollTo(0, 0);
+    return (
+      <>
+        <div
+          className="modal absolute top-[calc(50%-100px)] left-[calc(50%-200px)] w-[400px] h-[auto] p-4 bg-purple-500 text-white flex items-center justify-center text-xl cursor-pointer flex-col"
+          onClick={() => setShowModal(false)}
+        >
+          Recommended Career: <br />
+          <div className="text-2xl font-bold flex items-center justify-center px-2">
+            {result}
+          </div>
+        </div>
+      </>
+    );
   };
 
   const handleChange = (question) => (event, newValue) => {
@@ -392,6 +384,8 @@ const Quiz = () => {
           </div>
         </form>
       </div>
+
+      {showModal && modal()}
     </>
   );
 };
