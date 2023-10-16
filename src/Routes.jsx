@@ -11,7 +11,8 @@ import Dashboard from './pages/Dashboard';
 import Engineering from './pages/Engineering';
 import Doctor from './pages/Doctor';
 import Quiz from './pages/Quiz';
-// import Result from './components/Result';
+import Assessment from './pages/Assessment';
+import Result from './components/Result';
 
 const Routes = () => {
   return (
@@ -25,7 +26,8 @@ const Routes = () => {
         <Route exact path="/signup" component={Signup} />
         <Route exact path="/about/engineering" component={Engineering} />
         <Route exact path="/about/doctor" component={Doctor} />
-        {/* <Route exact path="/result" component={Result} /> */}
+        <Route exact path="/assessment" component={Assessment} />
+        <Route exact path="/result" component={Result} />
         <PrivateRoute exact path="/dashboard" component={Dashboard} />
         <PrivateRoute exact path="/quiz" component={Quiz} />
       </Switch>

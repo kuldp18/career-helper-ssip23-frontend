@@ -1,7 +1,15 @@
 import Footer from './Footer';
 import Navbar from './Navbar';
 
-const Result = ({ occupation, eligibility, education, institutes, trends }) => {
+const Result = ({
+  occupation,
+  eligibility,
+  education,
+  institutes,
+  trends,
+  result,
+}) => {
+  console.log(result);
   return (
     <>
       <Navbar />
